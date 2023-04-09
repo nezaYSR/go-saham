@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+
+  # go-saham:
+  #   build:
+  #     context: .
+  #     dockerfile: ../go-saham.dockerfile
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #   depends_on:
+  #     - pg_go_saham_db
+  #     - go_saham_rd
+  #   environment:
+  #     DB_HOST: pg_go_saham_db
+  #     DB_USER: go_saham
+  #     DB_PASSWORD: go_saham
+  #     DB_NAME: go_saham
+  #     REDIS_ADDR: go_saham_rd:6376
+  #   volumes:
+  #     - ./.env:/app/.env
+
+  pg_go_saham_db:
+    image: 'postgres:14.2'
+    ports:
+      - "5436:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: go_saham
+      POSTGRES_PASSWORD: go_saham
+      POSTGRES_DB: go_saham
+    volumes:
+      - ./db-data/go-saham/:/var/lib/postgresql/data
+
+  go_saham_rd:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6376:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - ./db-data/go-saham-cache/:/data
